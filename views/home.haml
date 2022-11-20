@@ -1,0 +1,30 @@
+%html.h-100{lang:"en"}
+  %head
+    %title Switchplug Webinterface
+    %link{rel:"stylesheet", href:"/css/bootstrap.min.css"}
+    %meta{charset:"UTF-8"}
+  %body.h-100.d-flex.flex-column
+    .container
+      %h1.mt-5 Switchplug Webinterface
+      %p This site provides an overview over the configuration to switch the fritz plugs by awattar hourly price
+      %h2 Preisübersicht
+      In grün die billigsten Stunden, zu denen der Stecker eingeschaltet wird.
+      %br
+      %br
+      -for(var i = 0, len = hourly_prices.length; i < len; i++)
+        -var price = hourly_prices[i].total
+        -var price_hour = hourly_prices[i].startsAt
+        -var bar_color = 'blue'
+        -if(charging_hours.includes(price_hour))
+          -bar_color = 'green'
+        =price_hour
+        .progress
+          .progress-bar{role:"progressbar", style:"width: "+(price*100)+"%;background-color:"+bar_color}=Math.round(price*100)/100 + ' cent'
+    .footer.mt-auto.py-3
+      .container
+        %span.text-muted
+          Maintained by
+          %a{href: "https://t.me/Master92"} Moritz Mair
+          . For contributing please make a pull request on
+          %a{href: "https://github.com/moritzmair/e3dc_grid_charge"} Github
+          .

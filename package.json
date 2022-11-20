@@ -1,0 +1,19 @@
+{
+  "name": "e3dc_grid_charge",
+  "version": "0.1",
+  "description": "Uses the tibber api to charge E3DC battery storage on cheapest hours",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Moritz Mair",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^4.4.1",
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "hamljs": "^0.6.2",
+    "node-cron": "^2.0.3",
+    "node-fetch": "^2.6.0"
+  }
+}

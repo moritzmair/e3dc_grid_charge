@@ -3,6 +3,7 @@
 ## What is this about?
 
 This will get prices from the tibber api, find out the cheapest hours and charge an E3 DC battey storage system via modbus
+e3dc rscp protocoll mainly based on https://github.com/git-kick/ioBroker.e3dc-rscp
 
 ## Setup
 * clone repo

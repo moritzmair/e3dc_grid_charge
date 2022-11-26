@@ -2,11 +2,6 @@
 // 
 // Please do not change anything in this file. Use the config.json file to configure
 
-// e3dc
-
-
-// --------------
-
 const https = require('https');
 const fetch = require("node-fetch");
 const fs = require('fs');
@@ -19,6 +14,13 @@ if(typeof URLSearchParams === 'undefined'){
 
 let rawdata = fs.readFileSync('config.json');
 let config_file = JSON.parse(rawdata);
+
+// e3dc
+var E3dcRscp = require('./e3dc_rscp_lib/e3dcrscp.js');
+e3dc = new E3dcRscp(config_file);
+
+e3dc.initChannel();
+// --------------
 
 var Webserver = require('./webserver.js');
 

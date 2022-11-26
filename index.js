@@ -2,6 +2,11 @@
 // 
 // Please do not change anything in this file. Use the config.json file to configure
 
+// e3dc
+
+
+// --------------
+
 const https = require('https');
 const fetch = require("node-fetch");
 const fs = require('fs');
@@ -85,12 +90,18 @@ function identify_cheapest_hours(now){
   charging_hours = new Array(sorted_prices[0].startsAt, sorted_prices[1].startsAt);
 }
 
-function turn_switch(sid, identifier, state){
-  if(state == 1){
-    fritz.setSwitchOn(sid, identifier);
-  }else{
-    fritz.setSwitchOff(sid, identifier);
-  }
+function start_stop_charging(state){
+  // Trigger: derate power is reached, i.e. power to grid will be capped
+  // Action: reset battery charge power limit to maximum, as specified under SYS_SPECS
+  on( {
+    id: 'e3dc-rscp.0.EMS.POWER_GRID', 
+    valLe: -getState('e3dc-rscp.0.EMS.DERATE_AT_POWER_VALUE').val, 
+    change: 'lt', 
+    logic: 'and'
+  }, (obj) => {
+    console.log('Trigger: power to grid is at derate threshold - reset charge power limit');
+    setState('e3dc-rscp.0.EMS.MAX_CHARGE_POWER', getState('e3dc-rscp.0.EMS.SYS_SPECS.maxBatChargePower').val );
+  });
 }
 
 Date.prototype.addHours = function(h) {

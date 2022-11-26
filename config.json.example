@@ -1,6 +1,5 @@
 {
   "tibber_token": "your_token_from_tibber",
   "tibber_home_id": "your_tibber_home_id",
-  "hours_to_turn_on": 3,
   "port_webserver": 8080
 }

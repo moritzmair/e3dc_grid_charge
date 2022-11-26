@@ -5,10 +5,8 @@
     %meta{charset:"UTF-8"}
   %body.h-100.d-flex.flex-column
     .container
-      %h1.mt-5 Switchplug Webinterface
-      %p This site provides an overview over the configuration to switch the fritz plugs by awattar hourly price
       %h2 Preisübersicht
-      In grün die billigsten Stunden, zu denen der Stecker eingeschaltet wird.
+      In grün die billigsten Stunden, zu denen der Speicher geladen wird.
       %br
       %br
       -for(var i = 0, len = hourly_prices.length; i < len; i++)

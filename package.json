@@ -10,10 +10,12 @@
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^4.4.1",
+    "crc-32": "^1.2.2",
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "hamljs": "^0.6.2",
     "node-cron": "^2.0.3",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "rijndael-js": "^2.0.0"
   }
 }

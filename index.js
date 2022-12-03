@@ -87,7 +87,7 @@ async function refresh_epex() {
   identify_cheapest_hours(Date.now());
 }
 
-setInterval(function(){ decide_switch(); }, 1000*1);
+setInterval(function(){ decide_switch(); }, 1000*60);
 
 function decide_switch(){
   console.log(charging_hours);

@@ -17,7 +17,7 @@
           -bar_color = 'green'
         =price_hour
         .progress
-          .progress-bar{role:"progressbar", style:"width: "+(price*100)+"%;background-color:"+bar_color}=Math.round(price*100)/100 + ' cent'
+          .progress-bar{role:"progressbar", style:"width: "+(price*100)+"%;background-color:"+bar_color}=Math.round(price*100) + ' cent'
     .footer.mt-auto.py-3
       .container
         %span.text-muted

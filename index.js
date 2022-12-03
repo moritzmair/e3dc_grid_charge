@@ -20,7 +20,6 @@ var E3dcRscp = require('./e3dc_rscp_lib/e3dcrscp.js');
 e3dc = new E3dcRscp(config_file);
 
 e3dc.initChannel();
-// --------------
 
 var Webserver = require('./webserver.js');
 
@@ -88,22 +87,44 @@ async function refresh_epex() {
   identify_cheapest_hours(Date.now());
 }
 
+setInterval(function(){ decide_switch(); }, 1000*1);
+
+function decide_switch(){
+  console.log(charging_hours);
+
+  d = new Date();
+
+  current_hour = d.getFullYear()+"-"+(d.getMonth()+1).toString().padStart(2, "0")+"-"+d.getDate().toString().padStart(2, "0")+"T"+d.getHours().toString().padStart(2, "0");
+
+  console.log(current_hour);
+
+  if(charging_hours.some((element) => element.includes(current_hour))){
+    console.log("-- start charging --")
+    start_charging();
+  }else{
+    console.log("-- stop charging --")
+    stop_charging();
+  }
+}
+
 function identify_cheapest_hours(now){
   charging_hours = new Array(sorted_prices[0].startsAt, sorted_prices[1].startsAt);
 }
 
-function start_stop_charging(state){
-  // Trigger: derate power is reached, i.e. power to grid will be capped
-  // Action: reset battery charge power limit to maximum, as specified under SYS_SPECS
-  on( {
-    id: 'e3dc-rscp.0.EMS.POWER_GRID', 
-    valLe: -getState('e3dc-rscp.0.EMS.DERATE_AT_POWER_VALUE').val, 
-    change: 'lt', 
-    logic: 'and'
-  }, (obj) => {
-    console.log('Trigger: power to grid is at derate threshold - reset charge power limit');
-    setState('e3dc-rscp.0.EMS.MAX_CHARGE_POWER', getState('e3dc-rscp.0.EMS.SYS_SPECS.maxBatChargePower').val );
-  });
+const rscpEmsSetPowerMode = {
+	0: "NORMAL",
+	1: "IDLE",
+	2: "DISCHARGE",
+	3: "CHARGE",
+	4: "GRID_CHARGE",
+};
+
+function start_charging(){
+  e3dc.sendEmsSetPower(4, 5000);
+}
+
+function stop_charging(){
+  e3dc.sendEmsSetPower(0, 5000);
 }
 
 Date.prototype.addHours = function(h) {

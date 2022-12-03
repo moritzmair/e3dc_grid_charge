@@ -95,6 +95,8 @@ const rscpAuthLevel = {
 	50: "E3DC_ADMIN",
 	60: "E3DC_ROOT",
 };
+var rscpAuthLevelValue = 0;
+
 const rscpBatTrainingMode = {
 	0: "Not training",
 	1: "Training, discharging",
@@ -139,13 +141,6 @@ const rscpEmsMode = {
 	0: "IDLE",
 	1: "DISCHARGE",
 	2: "CHARGE",
-};
-const rscpEmsSetPowerMode = {
-	0: "NORMAL",
-	1: "IDLE",
-	2: "DISCHARGE",
-	3: "CHARGE",
-	4: "GRID_CHARGE",
 };
 const rscpWbMode = {
 	0: "NONE",
@@ -226,7 +221,6 @@ const rscpWbType = {
 	2: "EASYCONNECT",
 };
 */
-
 
 // Assign enumerations to states:
 const mapIdToCommonStates = {
@@ -438,7 +432,7 @@ class E3dcRscp {
 	}
 
 	// Create channel to E3/DC: encapsulating TCP connection, encryption, message queuing
-	initChannel( ) {
+	initChannel() {
 		if( ! this.config.portal_user ) this.config.portal_user = "";
 		if( ! this.config.portal_password ) this.config.portal_password = "";
 
@@ -450,7 +444,7 @@ class E3dcRscp {
 
 		this.queueRscpAuthentication();
 		this.checkAuthTimeout = setTimeout(() => {
-			if( this.rscpAuthLevel < 10  ) {
+			if( this.rscpAuthLevelValue < 10  ) {
 				console.error("Authentication against E3/DC failed - check adapter settings, then restart instance.");
 			}
 		}, 5000); // check authentication success after 5 seconds - no retry.
@@ -461,6 +455,7 @@ class E3dcRscp {
 		});
 
 		this.tcpConnection.on("data", (data) => {
+			console.log("Data is coming in...");
 			// Use inBuffer to handle TCP fragmentation:
 			if( this.inBuffer ) {
 				this.inBuffer = Buffer.concat( [this.inBuffer, data] );
@@ -473,7 +468,7 @@ class E3dcRscp {
 				if( rscpTag[receivedFrame.readUInt32LE(18)] ) console.log(rscpTag[receivedFrame.readUInt32LE(18)].TagNameGlobal);
 				if( this.decryptionIV ) this.inBuffer.copy( this.decryptionIV, 0, this.inBuffer.length - BLOCK_SIZE ); // last encrypted block will be used as IV for next frame
 				console.log( `IN: ${printRscpFrame(receivedFrame)}` );
-				// console.log( dumpRscpFrame(receivedFrame) );
+			    console.log( dumpRscpFrame(receivedFrame) );
 				this.processFrame(receivedFrame);
 				this.sendFrameFIFO();
 				this.inBuffer = null;
@@ -497,11 +492,12 @@ class E3dcRscp {
 			this.reconnectChannel();
 		});
 
-		this.tcpConnection.on("error", () => {
+		this.tcpConnection.on("error", (error) => {
 			console.error("E3/DC connection error");
+			console.log(error);
 			this.reconnectChannel();
 		});
-
+ 
 		// Find out number of BAT units:
 		console.debug(`Probing for BAT units - 0..${this.batProbes-1}.`);
 		if( this.config.query_bat ) this.queueBatProbe(this.batProbes);
@@ -533,7 +529,7 @@ class E3dcRscp {
 			this.reconnectTimeout = setTimeout(() => {
 				this.reconnectTimeout = null;
 				console.info("Try reconnecting to E3/DC");
-				this.initChannel();
+				//this.initChannel();
 			}, 60000);
 		}
 	}
@@ -864,19 +860,13 @@ class E3dcRscp {
 		this.addTagtoFrame( "TAG_EMS_REQ_MODE" ); // separately update MODE because SET_POWER response contains VALUE, but not MODE
 		this.pushFrame();
 		this.sendFrameLIFO();
-		// Acknowledge SET_POWER_*
-		this.setState( "EMS.SET_POWER_MODE", mode, true );
-		this.setState( "EMS.SET_POWER_VALUE", value, true );
 		// E3/DC requires regular SET_POWER repetition, otherwise it will fall back to NORMAL mode:
-		if( (mode > 0 && this.config.setpower_interval > 0) && !this.setPowerTimer ) {
-			this.setPowerTimer = setInterval(() => {
-				this.getState( "EMS.SET_POWER_VALUE", (err, vObj) => {
-					this.getState( "EMS.SET_POWER_MODE", (err, mObj) => {
-						this.sendEmsSetPower( mObj ? mObj.val : 0, vObj ? vObj.val : 0 );
-					});
-				});
+		if( mode > 0 && this.config.setpower_interval > 0 ) {
+			this.setPowerTimer = setTimeout(() => {
+				this.sendEmsSetPower(mode, value);
 			}, this.config.setpower_interval*1000 );
-		} else if( (mode == 0 || this.config.setpower_interval == 0) && this.setPowerTimer ) { // clear timer when mode is set to NORMAL or interval is zero
+		} else if( mode == 0 || this.config.setpower_interval == 0 ) { // clear timer when mode is set to NORMAL or interval is zero
+			clearTimeout(this.setPowerTimer);
 			this.setPowerTimer = null; // nullify to enable "is timer running" check
 		}
 	}
@@ -1283,7 +1273,7 @@ class E3dcRscp {
 			if( typeName == "Container" ) {
 				if( shortId == "EMS.SYS_SPEC" && token.content.length == 3 ) {
 					this.storeValue( nameSpace, pathNew + "SYS_SPECS.", token.content[1].content, "Int32", token.content[2].content, token.content[1].content, sysSpecUnits[token.content[1].content] );
-					this.extendObject( `EMS.SYS_SPECS`, {type: "channel", common: {role: "info"}} );
+					//this.extendObject( `EMS.SYS_SPECS`, {type: "channel", common: {role: "info"}} );
 				} else if( shortId == "EMS.GET_IDLE_PERIODS" ) {
 					this.storeIdlePeriods( token.content, pathNew );
 				} else if( shortId.startsWith("DB.HISTORY_DATA_") ) {
@@ -1292,13 +1282,13 @@ class E3dcRscp {
 					this.storeValue( nameSpace, pathNew, tagName, rscpType[token.content[1].type], token.content[1].content );
 				} else if ( phaseIds.includes(shortId)  && token.content.length == 2 ) {
 					this.storeValue( nameSpace, pathNew + `Phase_${token.content[0].content}.`, tagName, rscpType[token.content[1].type], token.content[1].content );
-					this.extendObject( `${nameSpace}.${pathNew}Phase_${token.content[0].content}`, {type: "channel", common: {role: "sensor.electricity"}} );
+					//this.extendObject( `${nameSpace}.${pathNew}Phase_${token.content[0].content}`, {type: "channel", common: {role: "sensor.electricity"}} );
 				} else if ( stringIds.includes(shortId)  && token.content.length == 2 ) {
 					this.storeValue( nameSpace, pathNew + `String_${token.content[0].content}.`, tagName, rscpType[token.content[1].type], token.content[1].content );
-					this.extendObject( `${nameSpace}.${pathNew}String_${token.content[0].content}`, {type: "channel", common: {role: "sensor.electricity"}} );
+					//this.extendObject( `${nameSpace}.${pathNew}String_${token.content[0].content}`, {type: "channel", common: {role: "sensor.electricity"}} );
 				} else if ( shortId == "PVI.TEMPERATURE"  && token.content.length == 2 ) {
 					this.storeValue( nameSpace, pathNew + "TEMPERATURE.", token.content[0].content.toString().padStart(2,"0"), rscpType[token.content[1].type], token.content[1].content, "TEMPERATURE", "°C" );
-					this.extendObject( `${nameSpace}.${pathNew}TEMPERATURE`, {type: "channel", common: {role: "sensor.temperature"}} );
+					//this.extendObject( `${nameSpace}.${pathNew}TEMPERATURE`, {type: "channel", common: {role: "sensor.temperature"}} );
 				} else {
 					this.processTree( token.content, pathNew );
 				}
@@ -1328,7 +1318,7 @@ class E3dcRscp {
 					this.storeValue( nameSpace, pathNew + tagName + ".", multipleValueIndex[shortId].toString().padStart(2,"0"), t, v, dictionaryIndex, unit );
 					let r = "info";
 					if( tagName.includes("TEMPERATURE") ) r = "sensor.temperature"; else if( tagName.includes("VOLTAGE") ) r = "sensor.electricity";
-					this.extendObject( `${nameSpace}.${pathNew.slice(0,-1)}.${tagName}`, {type: "channel", common: {role: r}} );
+					//this.extendObject( `${nameSpace}.${pathNew.slice(0,-1)}.${tagName}`, {type: "channel", common: {role: r}} );
 					multipleValueIndex[shortId]++;
 					continue;
 				}
@@ -1339,7 +1329,7 @@ class E3dcRscp {
 						this.maxIndex[nameSpace] = this.maxIndex[nameSpace] ? Math.max( this.maxIndex[nameSpace], token.content) : token.content;
 						//console.log(`maxIndex[${nameSpace}] = ${this.maxIndex[nameSpace]}`);
 						pathNew = `${nameSpace}_${token.content}.`;
-						this.extendObject( `${nameSpace}.${pathNew.slice(0,-1)}`, {type: "channel", common: {role: "info.module"}} );
+						//this.extendObject( `${nameSpace}.${pathNew.slice(0,-1)}`, {type: "channel", common: {role: "info.module"}} );
 					}
 					continue;
 				}
@@ -1349,7 +1339,7 @@ class E3dcRscp {
 					const key = path ? `${path}.${name}` : name ;
 					this.maxIndex[key] = this.maxIndex[key] ? Math.max( this.maxIndex[key], token.content) : token.content;
 					pathNew = path ? `${pathNew.split(".").slice(0,-1).join(".")}.${name}_${token.content}.` : `${name}_${token.content}.`;
-					this.extendObject( `${nameSpace}.${pathNew.slice(0,-1)}`, {type: "channel", common: {role: "info.submodule"}} );
+					//this.extendObject( `${nameSpace}.${pathNew.slice(0,-1)}`, {type: "channel", common: {role: "info.submodule"}} );
 					continue;
 				}
 				// ..._COUNT explicitely sets upper bound for (sub-)device index
@@ -1400,6 +1390,8 @@ class E3dcRscp {
 	}
 
 	storeValue( nameSpace, path, tagName, typeName, value, dictionaryIndex, unit = "" ) {
+		console.log("store value")
+		console.log(nameSpace + " - " + path + " - " + tagName + " - " + typeName + " - " + value)
 		if( !dictionaryIndex ) dictionaryIndex = tagName;
 		const oId = `${nameSpace}.${path}${tagName}`;
 		const oKey = `${nameSpace}.${tagName}`;
@@ -1415,6 +1407,7 @@ class E3dcRscp {
 			oUnit = rscpTag[rscpTagCode[`TAG_${nameSpace}_${tagName}`]].Unit;
 		}
 		const oName = systemDictionary[dictionaryIndex] ? systemDictionary[dictionaryIndex][this.language] : "***UNDEFINED_NAME***";
+		/*
 		this.setObjectNotExists( oId, {
 			type: "state",
 			common: {
@@ -1434,6 +1427,7 @@ class E3dcRscp {
 				}
 			});
 		});
+		*/
 	}
 
 	storeIdlePeriods( tree, path ) {
@@ -1464,11 +1458,11 @@ class E3dcRscp {
 				this.storeValue( "EMS", newPath, "START_MINUTE", "UChar8", startMinute, "START_MINUTE", "m" );
 				this.storeValue( "EMS", newPath, "END_HOUR", "UChar8", endHour, "END_HOUR", "h" );
 				this.storeValue( "EMS", newPath, "END_MINUTE", "UChar8", endMinute, "END_MINUTE", "m" );
-				this.extendObject( `EMS.${newPath.slice(0,-1)}`, {type: "channel", common: {role: "calendar.day"}} );
+				//this.extendObject( `EMS.${newPath.slice(0,-1)}`, {type: "channel", common: {role: "calendar.day"}} );
 			}
 		});
-		this.extendObject( "EMS.IDLE_PERIODS_CHARGE", {type: "channel", common: {role: "calendar.week"}} );
-		this.extendObject( "EMS.IDLE_PERIODS_DISCHARGE", {type: "channel", common: {role: "calendar.week"}} );
+		//this.extendObject( "EMS.IDLE_PERIODS_CHARGE", {type: "channel", common: {role: "calendar.week"}} );
+		//this.extendObject( "EMS.IDLE_PERIODS_DISCHARGE", {type: "channel", common: {role: "calendar.week"}} );
 	}
 
 	storeHistoryData( tree, path ) {
@@ -1542,7 +1536,7 @@ class E3dcRscp {
 			// Here you must clear all timeouts or intervals that may still be active
 			this.tcpConnection.end();
 			this.tcpConnection.destroy();
-			this.rscpAuthLevel = 0
+			this.rscpAuthLevelValue = 0
 			callback();
 		} catch (e) {
 			callback();

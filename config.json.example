@@ -7,5 +7,5 @@
   "e3dc_port" : "5033",
   "e3dc_ip" : "your_local_e3dc_ip_adress",
   "rscp_password" : "your_rscp_password",
-  "setpower_interval" : 5
+  "setpower_interval" : 10
 }

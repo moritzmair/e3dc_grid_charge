@@ -850,6 +850,14 @@ class E3dcRscp {
 
 	sendEmsSetPower( mode, value ) {
 		console.debug( `queueEmsSetPower( ${mode}, ${value} )`);
+		
+		//just do nothing and disable repetition of sending if values are the default values of E3DC anyway. E3DC will fall back to NORMAL mode on its own.
+		if(mode == 0){
+			clearTimeout(this.setPowerTimer);
+			this.setPowerTimer = null;
+			return;
+		}
+		
 		this.clearFrame();
 		const pos = this.startContainer( "TAG_EMS_REQ_SET_POWER" );
 		this.addTagtoFrame( "TAG_EMS_REQ_SET_POWER_MODE", "", mode );

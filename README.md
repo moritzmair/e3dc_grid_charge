@@ -2,8 +2,33 @@
 
 ## What is this about?
 
-This will get prices from the tibber api, find out the cheapest hours and charge an E3 DC battey storage system via modbus
-e3dc rscp protocoll mainly based on https://github.com/git-kick/ioBroker.e3dc-rscp
+This will get prices from the tibber api, find out the cheapest hours and charge an E3 DC battey storage system via
+e3dc rscp protocol mainly based on https://github.com/git-kick/ioBroker.e3dc-rscp
+
+Be careful with this, this is a very early version. If you plan to use this be sure you know what you are doing.
+
+### Where to get your tibber token?
+* https://developer.tibber.com/
+### Where to get your tibber home id?
+* https://developer.tibber.com/explorer
+use the following request parameters to get all home id's and the according addresses
+```
+{
+  viewer {
+    homes {
+      id
+      address {
+        address1
+        postalCode
+        city
+      }
+    }
+  }
+}
+```
+### Where to set the rscp password?
+* on your E3DC touch panel under personalize > user profile > scroll down
+
 
 ## Setup
 * clone repo

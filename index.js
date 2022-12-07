@@ -52,12 +52,6 @@ async function refresh_epex() {
           homes {
             currentSubscription{
               priceInfo{
-                current{
-                  total
-                  energy
-                  tax
-                  startsAt
-                }
                 today {
                   total
                   energy
@@ -82,8 +76,16 @@ async function refresh_epex() {
 
   const responseBody = await response.json();
   price_info = responseBody.data.viewer.homes[0].currentSubscription.priceInfo
-  hourly_prices = price_info.today.concat(price_info.tomorrow);
-  sorted_prices = price_info.today.concat(price_info.tomorrow).sort(function(a, b){return a.total - b.total});
+  all_prices = price_info.today.concat(price_info.tomorrow);
+  now = new Date();
+  all_prices = all_prices.filter(function(ele){
+    datetime = new Date(ele.startsAt)
+    console.log(datetime);
+    console.log(now);
+    return datetime > now;
+  });
+  hourly_prices = all_prices.map(a => ({...a}));;
+  sorted_prices = all_prices.sort(function(a, b){return a.total - b.total});
   identify_cheapest_hours(Date.now());
 }
 

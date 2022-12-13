@@ -31,8 +31,8 @@ const GRAPHQL_URL = 'https://api.tibber.com/v1-beta/gql';
 refresh_epex();
 
 
-cron.schedule('33 14 * * *', () => {
-  // run every day at 14:33
+cron.schedule('02 14 * * *', () => {
+  // run every day at 14:02
   refresh_epex();
 });
 
@@ -78,13 +78,12 @@ async function refresh_epex() {
   price_info = responseBody.data.viewer.homes[0].currentSubscription.priceInfo
   all_prices = price_info.today.concat(price_info.tomorrow);
   now = new Date();
+  tomorrow = new Date(Date.now() + (3600 * 1000 * 24));
   all_prices = all_prices.filter(function(ele){
     datetime = new Date(ele.startsAt)
-    console.log(datetime);
-    console.log(now);
-    return datetime > now;
+    return (datetime > now && datetime < tomorrow);
   });
-  hourly_prices = all_prices.map(a => ({...a}));;
+  hourly_prices = all_prices.map(a => ({...a}));
   sorted_prices = all_prices.sort(function(a, b){return a.total - b.total});
   identify_cheapest_hours(Date.now());
 }
@@ -93,13 +92,9 @@ async function refresh_epex() {
 setInterval(function(){ decide_switch(); }, 1000*120);
 
 function decide_switch(){
-  console.log(charging_hours);
-
   d = new Date();
 
   current_hour = d.getFullYear()+"-"+(d.getMonth()+1).toString().padStart(2, "0")+"-"+d.getDate().toString().padStart(2, "0")+"T"+d.getHours().toString().padStart(2, "0");
-
-  console.log(current_hour);
 
   if(charging_hours.some((element) => element.includes(current_hour))){
     console.log("-- start charging --")

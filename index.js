@@ -106,7 +106,7 @@ function decide_switch(){
 }
 
 function identify_cheapest_hours(now){
-  charging_hours = new Array(sorted_prices[0].startsAt, sorted_prices[1].startsAt, sorted_prices[2].startsAt);
+  charging_hours = new Array(sorted_prices[0].startsAt, sorted_prices[1].startsAt);
 }
 
 const rscpEmsSetPowerMode = {

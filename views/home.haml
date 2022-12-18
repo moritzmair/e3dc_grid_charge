@@ -1,23 +1,27 @@
 %html.h-100{lang:"en"}
   %head
-    %title Switchplug Webinterface
+    %title E3DC GRID Charge Webinterface
     %link{rel:"stylesheet", href:"/css/bootstrap.min.css"}
     %meta{charset:"UTF-8"}
-  %body.h-100.d-flex.flex-column
+    %meta{name:"viewport", content:"width=device-width, user-scalable=0"}
+  %body.h-100.d-flex.flex-column{style: "overflow-x: hidden;"}
     .container
       %h2 Preisübersicht
-      In grün die billigsten Stunden, zu denen der Speicher geladen wird.
-      %br
-      %br
+      -var highest_price = 0
+      -for(var i = 0, len = hourly_prices.length; i < len; i++)
+        -if(highest_price < hourly_prices[i].total)
+        -highest_price = hourly_prices[i].total
       -for(var i = 0, len = hourly_prices.length; i < len; i++)
         -var price = hourly_prices[i].total
-        -var price_hour = hourly_prices[i].startsAt
-        -var bar_color = 'blue'
-        -if(charging_hours.includes(price_hour))
-          -bar_color = 'green'
-        =price_hour
-        .progress
-          .progress-bar{role:"progressbar", style:"width: "+(price*100)+"%;background-color:"+bar_color}=Math.round(price*100) + ' cent'
+        -var price_hour = new Date(hourly_prices[i].startsAt)
+        -var bar_color = 'bg-warning'
+        -if(charging_hours.includes(hourly_prices[i].startsAt))
+          -bar_color = 'bg-success'
+        =price_hour.toLocaleString()
+        .progress{style: "margin-bottom: 5px;"}
+          .progress-bar{role:"progressbar", style:"color: black; width: "+(price/highest_price*100)+"%", class: bar_color}=Math.round(price*100) + ' Cent'
+      %br
+      In grün die billigsten Stunden, zu denen der Speicher geladen wird.
     .footer.mt-auto.py-3
       .container
         %span.text-muted

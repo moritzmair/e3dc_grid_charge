@@ -89,7 +89,8 @@ async function refresh_epex() {
 }
 
 // decide_switch every 2 minutes
-setInterval(function(){ decide_switch(); }, 1000*120);
+// E3/DC requires regular SET_POWER repetition, otherwise it will fall back to NORMAL mode
+setInterval(function(){ decide_switch(); }, 1000*config_file.setpower_interval);
 
 function decide_switch(){
   d = new Date();

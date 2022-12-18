@@ -851,10 +851,8 @@ class E3dcRscp {
 	sendEmsSetPower( mode, value ) {
 		console.debug( `queueEmsSetPower( ${mode}, ${value} )`);
 		
-		//just do nothing and disable repetition of sending if values are the default values of E3DC anyway. E3DC will fall back to NORMAL mode on its own.
+		//just do nothing if values are the default values of E3DC anyway. E3DC will fall back to NORMAL mode on its own.
 		if(mode == 0){
-			clearTimeout(this.setPowerTimer);
-			this.setPowerTimer = null;
 			return;
 		}
 		
@@ -868,15 +866,6 @@ class E3dcRscp {
 		this.addTagtoFrame( "TAG_EMS_REQ_MODE" ); // separately update MODE because SET_POWER response contains VALUE, but not MODE
 		this.pushFrame();
 		this.sendFrameLIFO();
-		// E3/DC requires regular SET_POWER repetition, otherwise it will fall back to NORMAL mode:
-		if( mode > 0 && this.config.setpower_interval > 0 ) {
-			this.setPowerTimer = setTimeout(() => {
-				this.sendEmsSetPower(mode, value);
-			}, this.config.setpower_interval*1000 );
-		} else if( mode == 0 || this.config.setpower_interval == 0 ) { // clear timer when mode is set to NORMAL or interval is zero
-			clearTimeout(this.setPowerTimer);
-			this.setPowerTimer = null; // nullify to enable "is timer running" check
-		}
 	}
 
 	queueSysRequestData( sml ) {

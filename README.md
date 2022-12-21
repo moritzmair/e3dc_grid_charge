@@ -11,6 +11,8 @@ The prices and the selected hours can be viewed with a webserver on port 8080 ->
 
 Be careful with this, this is a very early version. If you plan to use this be sure you know what you are doing.
 
+![Web Interface](charging_hours.png)
+
 ### Where to get your tibber token?
 * https://developer.tibber.com/
 ### Where to get your tibber home id?

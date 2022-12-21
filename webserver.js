@@ -5,11 +5,12 @@ class Webserver {
     this.data = {man_turn_on_until: new Date}
   }
 
-  refresh_parameters(config, hourly_prices, charging_hours){
+  refresh_parameters(all_prices, charging_hours, all_prices_night){
     this.data = {
       config: this.config,
-      hourly_prices: hourly_prices,
+      all_prices: all_prices,
       charging_hours: charging_hours,
+      all_prices_night: all_prices_night
     };
     this.server.close();
     this.start();

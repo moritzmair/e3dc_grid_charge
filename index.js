@@ -79,16 +79,15 @@ async function refresh_epex() {
   all_prices = price_info.today.concat(price_info.tomorrow);
   now = new Date();
   tomorrow = new Date(Date.now() + (3600 * 1000 * 24));
-  all_prices = all_prices.filter(function(ele){
+  all_prices_night = all_prices.filter(function(ele){
     datetime = new Date(ele.startsAt)
     return (datetime > now && datetime < tomorrow);
   });
-  hourly_prices = all_prices.map(a => ({...a}));
-  sorted_prices = all_prices.sort(function(a, b){return a.total - b.total});
+  hourly_prices = all_prices_night.map(a => ({...a}));
+  sorted_prices = all_prices_night.sort(function(a, b){return a.total - b.total});
   identify_cheapest_hours(Date.now());
 }
 
-// decide_switch every 2 minutes
 // E3/DC requires regular SET_POWER repetition, otherwise it will fall back to NORMAL mode
 setInterval(function(){ decide_switch(); }, 1000*config_file.setpower_interval);
 
@@ -107,7 +106,10 @@ function decide_switch(){
 }
 
 function identify_cheapest_hours(now){
-  charging_hours = new Array(sorted_prices[0].startsAt, sorted_prices[1].startsAt);
+  charging_hours = sorted_prices.slice(0, config_file.charging_hours);
+  charging_hours.forEach((element, index) => {
+    charging_hours[index] = element.startsAt;
+  });
 }
 
 const rscpEmsSetPowerMode = {
@@ -119,7 +121,7 @@ const rscpEmsSetPowerMode = {
 };
 
 function start_charging(){
-  e3dc.sendEmsSetPower(4, 5000);
+  e3dc.sendEmsSetPower(4, config_file.max_charge_power);
 }
 
 function stop_charging(){

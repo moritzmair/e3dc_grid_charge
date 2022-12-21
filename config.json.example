@@ -7,5 +7,7 @@
   "e3dc_port" : "5033",
   "e3dc_ip" : "your_local_e3dc_ip_adress",
   "rscp_password" : "your_rscp_password",
-  "setpower_interval" : 10
+  "setpower_interval" : 10,
+  "max_charge_power" : 3000,
+  "charging_hours" : 3
 }

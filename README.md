@@ -11,7 +11,14 @@ The prices and the selected hours can be viewed with a webserver on port 8080 ->
 
 Be careful with this, this is a very early version. If you plan to use this be sure you know what you are doing.
 
+Web interface showing one day in december 2022
 ![Web Interface](charging_hours.png)
+
+Typical day where grid charging has been active for 2 hours in the night
+![E3DC statistics](e3dc_stats.png)
+
+If you want to get in touch with me, just message me on Telegram:
+[@Master92](https://t.me/Master92) 🇩🇪🇬🇧
 
 ### Where to get your tibber token?
 * https://developer.tibber.com/

@@ -24,7 +24,7 @@
         .progress{style: "margin-bottom: 1px;margin-top: -2px;"+additional_progress_style}
           .progress-bar{role:"progressbar", style:"color: black; width: "+(price/highest_price*100)+"%", class: bar_color}=Math.round(price*100) + ' Cent'
       %br
-      In grün die billigsten Stunden, zu denen der Speicher geladen wird.
+      In grün die billigsten Stunden, zu denen der Speicher geladen wird. Stunden, die nicht mehr oder noch nicht berücksichtigt werden sind ausgegraut.
     .footer.mt-auto.py-3
       .container
         %span.text-muted

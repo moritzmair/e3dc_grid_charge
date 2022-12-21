@@ -5,6 +5,10 @@
 This will get prices from the tibber api, find out the cheapest hours and charge an E3 DC battey storage system via
 e3dc rscp protocol mainly based on https://github.com/git-kick/ioBroker.e3dc-rscp
 
+The idea is to use energy when it is cheaply available and not beeing needed by most people on the energy grid.
+As prices on the epex spot market are released at about 13:00 this software will ask for the day ahead prices at about 14:00 and search for the x cheapest hours for the next 24 hours.
+The prices and the selected hours can be viewed with a webserver on port 8080 -> http://localhost:8080/
+
 Be careful with this, this is a very early version. If you plan to use this be sure you know what you are doing.
 
 ### Where to get your tibber token?

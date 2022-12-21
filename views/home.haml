@@ -20,8 +20,8 @@
           -additional_progress_style = 'opacity: 1'
         -if(charging_hours.includes(all_prices[i].startsAt))
           -bar_color = 'bg-success'
-        =price_hour.toLocaleString()
-        .progress{style: "margin-bottom: 5px;"+additional_progress_style}
+        %small=price_hour.toLocaleString()
+        .progress{style: "margin-bottom: 1px;margin-top: -2px;"+additional_progress_style}
           .progress-bar{role:"progressbar", style:"color: black; width: "+(price/highest_price*100)+"%", class: bar_color}=Math.round(price*100) + ' Cent'
       %br
       In grün die billigsten Stunden, zu denen der Speicher geladen wird.

@@ -112,13 +112,12 @@ function identify_cheapest_hours(now){
   });
 }
 
-const rscpEmsSetPowerMode = {
-	0: "NORMAL",
-	1: "IDLE",
-	2: "DISCHARGE",
-	3: "CHARGE",
-	4: "GRID_CHARGE",
-};
+// rscpEmsSetPowerMode:
+//	0: "NORMAL"
+//	1: "IDLE"
+//	2: "DISCHARGE"
+//	3: "CHARGE"
+//	4: "GRID_CHARGE"
 
 function start_charging(){
   e3dc.sendEmsSetPower(4, config_file.max_charge_power);

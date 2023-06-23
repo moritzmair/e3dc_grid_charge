@@ -9,6 +9,9 @@ The idea is to use energy when it is cheaply available and not beeing needed by 
 As prices on the epex spot market are released at about 13:00 this software will ask for the day ahead prices at about 14:00 and search for the x cheapest hours for the next 24 hours.
 The prices and the selected hours can be viewed with a webserver on port 8080 -> http://localhost:8080/
 
+It is important to note that charging the battery and discharging it will wear it down. So to take this into account we can calculate how much storing of 1 kwh costs. For example if my E3DC Setup cost 10k Euro and I got 10 kwh capacity available. If we presume that we would need to replace the battery after 10000 cycles one kwh will cost us: 10,000 Euro / 10,000 / 10 = 0,10 Euro. Surely we're doing this because we got the battery anyway to use our solar power from the summer. So it is pretty hard to do a perfect calculation for this.
+The parameter for that "battery_degredation_cost" is currently not implemented and not used.
+
 Be careful with this, this is a very early version. If you plan to use this be sure you know what you are doing.
 
 Web interface showing one day in december 2022
@@ -48,7 +51,7 @@ use the following request parameters to get all home id's and the according addr
 * ```cd e3dc_grid_charge```
 * ```sudo apt-get install npm```
 * ```npm install```
-* ```cp config.json.example config.json```
+* ```cp config.example.json config.json```
 * ```nano config.json``` (change config to fit your needs)
 
 

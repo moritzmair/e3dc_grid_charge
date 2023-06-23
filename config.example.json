@@ -9,5 +9,6 @@
   "rscp_password" : "your_rscp_password",
   "setpower_interval" : 10,
   "max_charge_power" : 3000,
-  "charging_hours" : 3
+  "charging_hours" : 3,
+  "battery_degredation_cost" : 0.1
 }
